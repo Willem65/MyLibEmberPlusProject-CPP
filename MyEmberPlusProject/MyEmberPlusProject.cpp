@@ -25,6 +25,8 @@
 using namespace libember::glow;
 using namespace libember::ber;
 
+
+
 bool connectToProvider(const std::string& host, int port, SOCKET& connectSocket) {
     WSADATA wsaData;
     int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -69,11 +71,35 @@ void sendGetDirectoryRequest(SOCKET connectSocket) {
     }
 }
 
+
+void decodeEmberResponse(const std::vector<unsigned char>& response) {
+    std::cout << "Decoded Ember+ response:" << std::endl;
+
+    size_t index = 0;
+    while (index < response.size()) {
+        unsigned char type = response[index++];
+        unsigned char length = response[index++];
+
+        std::cout << "Type: " << std::hex << (int)type
+            << ", Length: " << std::dec << (int)length
+            << ", Value: ";
+
+        for (size_t i = 0; i < length && index < response.size(); ++i) {
+            std::cout << std::hex << (int)response[index++] << " ";
+        }
+        std::cout << std::dec << std::endl;
+    }
+}
+
+
 void receiveAndDecodeResponse(SOCKET connectSocket) {
     std::vector<unsigned char> response(1024);
     int bytesReceived = recv(connectSocket, reinterpret_cast<char*>(response.data()), response.size(), 0);
     if (bytesReceived > 0) {
         response.resize(bytesReceived);
+
+        decodeEmberResponse(response);
+
 
         // Decode the response
         // (This is a simplified example; actual decoding may vary based on Ember+ protocol)
@@ -93,6 +119,8 @@ void receiveAndDecodeResponse(SOCKET connectSocket) {
         std::cerr << "Recv failed. Error: " << WSAGetLastError() << std::endl;
     }
 }
+
+
 
 
 void traverseAndPrintTree() {
