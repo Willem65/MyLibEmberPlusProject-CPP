@@ -1,3 +1,4 @@
+
 #pragma comment(lib, "ember-static.lib")
 
 #define LIBEMBER_HEADER_ONLY
